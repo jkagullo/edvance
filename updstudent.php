@@ -2,6 +2,7 @@
     include "db.php";
 
     $student = null;
+    $message = "";
 
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (isset($_POST['StudentID'])) {
@@ -11,7 +12,7 @@
             if ($result->num_rows > 0) {
                 $student = $result->fetch_assoc();
             } else {
-                echo "No student found with ID: $studentID";
+                $message = "No student found with ID: $studentID";
             }
         } else {
             // Update student details
@@ -21,14 +22,15 @@
             $age = (int)$_POST['Age'];
             $sql = "UPDATE student SET FirstName = '$firstName', LastName = '$lastName', Age = $age WHERE StudentID = '$studentID'";
             if ($conn->query($sql) === TRUE) {
-                echo "Student updated successfully";
+                $message = "Student updated successfully";
             } else {
-                echo "Error: " . $sql . "<br>" . $conn->error;
+                $message = "Error: " . $sql . "<br>" . $conn->error;
             }
+            header("Location: updstudent.php?message=" . urlencode($message));
+            exit();
         }
     }
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -82,5 +84,21 @@
     <?php endif; ?>
 </div>
     </div>
+    <div id="snackbar" class="<?php echo isset($_GET['message']) ? 'show' : ''; ?>"><?php echo isset($_GET['message']) ? $_GET['message'] : ''; ?></div>
+
+    <script>
+        function showSnackbar(message) {
+            var snackbar = document.getElementById('snackbar');
+            snackbar.innerText = message;
+            snackbar.className = 'snackbar show';
+            setTimeout(function() { snackbar.className = snackbar.className.replace('show', ''); }, 3000);
+        }
+
+        <?php if (isset($_GET['message'])): ?>
+            window.onload = function() {
+                showSnackbar("<?php echo $_GET['message']; ?>");
+            };
+        <?php endif; ?>
+    </script>
 </body>
 </html>

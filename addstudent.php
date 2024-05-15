@@ -2,6 +2,7 @@
     include "db.php";
 
     $newStudentID = 0;
+    $message = "";
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Find the highest current StudentID
         $result = $conn->query("SELECT MAX(StudentID) AS maxID FROM student");
@@ -18,14 +19,17 @@
         $sql = "INSERT INTO student (StudentID, FirstName, LastName, Age) VALUES ('$newStudentID', '$firstName', '$lastName', $age)";
 
         if ($conn->query($sql) === TRUE) {
-            echo "New student added successfully";
+            $message = "New student added successfully!";
         } else {
-            echo "Error: " . $sql . "<br>" . $conn->error;
+            $message = "Error: " . $sql . "<br>" . $conn->error;
         }
 
         $conn->close();
+        header("Location: addstudent.php?message=" . urlencode($message));
+        exit();
     }
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -77,5 +81,23 @@
             </form>
         </div>
     </div>
+
+    <div id="snackbar"></div>
+
+    <script>
+        function showSnackbar(message) {
+            var snackbar = document.getElementById('snackbar');
+            snackbar.innerText = message;
+            snackbar.className = 'snackbar show';
+            setTimeout(function() { snackbar.className = snackbar.className.replace('show', ''); }, 3000);
+        }
+
+        <?php if (isset($_GET['message'])): ?>
+            window.onload = function() {
+                showSnackbar("<?php echo $_GET['message']; ?>");
+            };
+        <?php endif; ?>
+    </script>
+    
 </body>
 </html>

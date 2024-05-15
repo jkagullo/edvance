@@ -1,17 +1,19 @@
 <?php
     include "db.php";
 
+    $message = "";
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Delete student
         $studentID = $conn->real_escape_string($_POST['StudentID']);
         $sql = "DELETE FROM student WHERE StudentID = '$studentID'";
         if ($conn->query($sql) === TRUE) {
-            echo "Student deleted successfully";
+            $message = "Student deleted successfully!";
         } else {
-            echo "Error: " . $sql . "<br>" . $conn->error;
+            $message = "Error: " . $sql . "<br>" . $conn->error;
         }
+        header("Location: delstudent.php?message=" . urlencode($message));
+        exit();
     }
-
 ?>
 
 <!DOCTYPE html>
@@ -54,5 +56,23 @@
             </form>
         </div>
     </div>
+
+    <div id="snackbar"><?php echo isset($_GET['message']) ? $_GET['message'] : ''; ?></div>
+
+    <script>
+        function showSnackbar(message) {
+            var snackbar = document.getElementById('snackbar');
+            snackbar.innerText = message;
+            snackbar.className = 'snackbar show';
+            setTimeout(function() { snackbar.className = snackbar.className.replace('show', ''); }, 3000);
+        }
+
+        <?php if (isset($_GET['message'])): ?>
+            window.onload = function() {
+                showSnackbar("<?php echo $_GET['message']; ?>");
+            };
+        <?php endif; ?>
+    </script>
+
 </body>
 </html>
