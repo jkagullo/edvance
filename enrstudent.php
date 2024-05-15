@@ -4,6 +4,8 @@
     $newEnrollmentID = 0;
     $courses = array(); // Define the $courses array
 
+    $message = ""; // Initialize message variable
+
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Find the highest current EnrollmentID
         $result = $conn->query("SELECT MAX(EnrollmentID) AS maxID FROM enrollment");
@@ -20,9 +22,9 @@
         $sql = "INSERT INTO enrollment (EnrollmentID, StudentID, CourseID, Grade) VALUES ('$newEnrollmentID', '$studentID', '$courseID', '$grade')";
 
         if ($conn->query($sql) === TRUE) {
-            echo "New enrollment added successfully";
+            $message = "New enrollment added successfully";
         } else {
-            echo "Error: " . $sql . "<br>" . $conn->error;
+            $message = "Error: " . $sql . "<br>" . $conn->error;
         }
 
         $conn->close();
@@ -34,6 +36,7 @@
         }
     }
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -98,5 +101,20 @@
     </form>
 </div>
     </div>
+    <div id="snackbar" class="<?php echo $message ? 'show' : ''; ?>"><?php echo $message; ?></div>
+
+    <script>
+        function showSnackbar() {
+            var snackbar = document.getElementById("snackbar");
+            snackbar.className = "snackbar show";
+            setTimeout(function(){ snackbar.className = snackbar.className.replace("show", ""); }, 3000);
+        }
+
+        <?php if ($message): ?>
+            window.onload = function() {
+                showSnackbar();
+            };
+        <?php endif; ?>
+    </script>
 </body>
 </html>
