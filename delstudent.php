@@ -3,7 +3,6 @@
 
     $message = "";
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        // Delete student
         $studentID = $conn->real_escape_string($_POST['StudentID']);
         $sql = "DELETE FROM student WHERE StudentID = '$studentID'";
         if ($conn->query($sql) === TRUE) {

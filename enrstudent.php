@@ -2,23 +2,20 @@
     include "db.php";
 
     $newEnrollmentID = 0;
-    $courses = array(); // Define the $courses array
+    $courses = array(); 
 
-    $message = ""; // Initialize message variable
+    $message = ""; 
 
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        // Find the highest current EnrollmentID
         $result = $conn->query("SELECT MAX(EnrollmentID) AS maxID FROM enrollment");
         $row = $result->fetch_assoc();
         $maxID = (int)$row['maxID'];
         $newEnrollmentID = $maxID + 1;
 
-        // Retrieve form data
         $studentID = $conn->real_escape_string($_POST['StudentID']);
         $courseID = $conn->real_escape_string($_POST['CourseID']);
         $grade = $conn->real_escape_string($_POST['Grade']);
 
-        // Insert new enrollment with generated EnrollmentID
         $sql = "INSERT INTO enrollment (EnrollmentID, StudentID, CourseID, Grade) VALUES ('$newEnrollmentID', '$studentID', '$courseID', '$grade')";
 
         if ($conn->query($sql) === TRUE) {
@@ -29,7 +26,6 @@
 
         $conn->close();
     } else {
-        // Get all courses
         $result = $conn->query("SELECT * FROM course");
         while ($row = $result->fetch_assoc()) {
             $courses[] = $row;

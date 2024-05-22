@@ -1,11 +1,10 @@
 <?php
     include "db.php";
 
-    // Check if the form has been submitted
     if(isset($_POST['report'])){
         $selected = $_POST['report'];
     } else {
-        $selected = "Student"; // Default selection
+        $selected = "Student"; 
     }
     
 ?>
@@ -18,7 +17,6 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
-    
     <link rel="stylesheet" href="main.css">
     <title>edvance</title>
 

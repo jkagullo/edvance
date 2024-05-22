@@ -4,18 +4,15 @@
     $newStudentID = 0;
     $message = "";
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        // Find the highest current StudentID
         $result = $conn->query("SELECT MAX(StudentID) AS maxID FROM student");
         $row = $result->fetch_assoc();
         $maxID = (int)$row['maxID'];
         $newStudentID = $maxID + 1;
 
-        // Retrieve form data
         $firstName = $conn->real_escape_string($_POST['FirstName']);
         $lastName = $conn->real_escape_string($_POST['LastName']);
         $age = (int)$_POST['Age'];
 
-        // Insert new student with generated StudentID
         $sql = "INSERT INTO student (StudentID, FirstName, LastName, Age) VALUES ('$newStudentID', '$firstName', '$lastName', $age)";
 
         if ($conn->query($sql) === TRUE) {

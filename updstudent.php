@@ -6,7 +6,6 @@
 
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (isset($_POST['StudentID'])) {
-            // Fetch student details
             $studentID = $conn->real_escape_string($_POST['StudentID']);
             $result = $conn->query("SELECT * FROM student WHERE StudentID = '$studentID'");
             if ($result->num_rows > 0) {
@@ -15,7 +14,6 @@
                 $message = "No student found with ID: $studentID";
             }
         } else {
-            // Update student details
             $studentID = $conn->real_escape_string($_POST['UpdateStudentID']);
             $firstName = $conn->real_escape_string($_POST['FirstName']);
             $lastName = $conn->real_escape_string($_POST['LastName']);
