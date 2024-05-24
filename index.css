@@ -18,7 +18,7 @@ body {
 .wrapper {
     width: 450px;
     background-color: #202020;
-    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-top: 2px solid #3b3b3b;
     color: #e1e1e1;
     border-radius: 20px;
     padding: 30px 40px;
@@ -30,21 +30,26 @@ body {
 
 .wrapper img.logo {
     display: block;
-    margin: 0px auto 0px; /* Center the logo and add bottom margin */
+    margin: 0 auto; /* Center the logo */
     width: 100px; /* Adjust the width of the logo */
     height: auto; /* Maintain aspect ratio */
+    border: 1px solid #e1e1e1;
+    border-radius: 10px;
+    margin-bottom: 10px;
 }
 
-.wrapper h1{
+.wrapper h1 {
     text-align: center;
-    margin-bottom: 40px;
+    margin-bottom: 50px;
     font-size: 24px;
     font-weight: 400;
 }
+
 .wrapper h2 {
     font-size: 28px;
     text-align: center;
-    margin-bottom: 30px;
+    margin-bottom: 20px;
+    font-weight: 600;
 }
 
 .wrapper .input-box {
@@ -54,10 +59,25 @@ body {
     margin: 15px 0;
     background-color: #161616;
     border-radius: 10px;
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+    border: 1px solid #252525;
+}
+
+.wrapper .input-box{
+    box-shadow: inset 0 0 0 1px #252525;
+}
+
+.input-box i {
+    color: #e1e1e1;
+    font-size: 20px;
+    margin-right: 5px;
+    padding-left: 5px;
 }
 
 .input-box input {
-    width: 100%;
+    width: calc(100% - 30px); /* Adjust width to leave space for the icon */
     height: 100%;
     background: transparent;
     border: none;
@@ -65,20 +85,28 @@ body {
     border-radius: 10px;
     font-size: 15px;
     color: #e1e1e1;
-    padding: 0 40px 0 20px;
+    padding-left: 10px;
+    font-weight: 500;
 }
 
 .input-box input::placeholder {
-    color: #e1e1e1;
+    color: #8b8b8b;
     font-size: 15px;
+    font-weight: 500;
 }
 
-.input-box i {
-    position: absolute;
-    right: 20px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 20px;
+.wrapper .btn {
+    width: 350px; /* Set the width of the button */
+    height: 45px;
+    background: #e1e1e1;
+    border: none;
+    outline: none;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    font-size: 15px;
+    color: #333;
+    font-weight: 700;
 }
 
 .wrapper .remember-forgot {
@@ -100,20 +128,6 @@ body {
 
 .remember-forgot a:hover {
     text-decoration: underline;
-}
-
-.wrapper .btn {
-    width: 100%;
-    height: 45px;
-    background: #e1e1e1;
-    border: none;
-    outline: none;
-    border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    cursor: pointer;
-    font-size: 18px;
-    color: #333;
-    font-weight: 700;
 }
 
 .wrapper .register-link {
