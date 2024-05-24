@@ -4,16 +4,35 @@
     $message = "";
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $studentID = $conn->real_escape_string($_POST['StudentID']);
-        $sql = "DELETE FROM student WHERE StudentID = '$studentID'";
-        if ($conn->query($sql) === TRUE) {
-            $message = "Student deleted successfully!";
-        } else {
-            $message = "Error: " . $sql . "<br>" . $conn->error;
+
+        // Start a transaction
+        $conn->begin_transaction();
+        try {
+            // Delete associated records in the enrollment table
+            $deleteEnrollment = "DELETE FROM enrollment WHERE StudentID = '$studentID'";
+            $conn->query($deleteEnrollment);
+
+            // Delete the student record
+            $deleteStudent = "DELETE FROM student WHERE StudentID = '$studentID'";
+            if ($conn->query($deleteStudent) === TRUE) {
+                $message = "Student deleted successfully!";
+            } else {
+                throw new Exception("Error deleting student: " . $conn->error);
+            }
+
+            // Commit the transaction
+            $conn->commit();
+        } catch (Exception $e) {
+            // Rollback the transaction in case of error
+            $conn->rollback();
+            $message = "Error: " . $e->getMessage();
         }
+
         header("Location: delstudent.php?message=" . urlencode($message));
         exit();
     }
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">

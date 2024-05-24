@@ -1,6 +1,4 @@
-<?php
-    include "db.php";
-?>
+<?php include "db.php"; ?>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -10,51 +8,27 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="forms.css">
-    <title>edvance</title>
+    <link href='https://cdn.jsdelivr.net/npm/boxicons@2.0.5/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="stylesheet" href="index.css">
+    <title>edvance.</title>
 </head>
 <body>
-    <div class="header">
-        <div class="card1">
-            <p> Student Management System </p>
-        </div>
-        <div class="card2">
-            <a href="index.php"><button class="forms <?php echo basename($_SERVER['PHP_SELF']) === 'index.php' ? 'selected' : ''; ?>">
-                <p> Forms </p>
-            </button></a>
-            <a href="reports.php"><button class="reports">
-                <p> Reports </p>
-            </button></a>
-        </div>   
+  <div class="wrapper">
+    <form action="">
+        <img src="assets/logo1.svg" alt="logo" class="logo">
+        <h1>edvance</h1>
+        <h2>Welcome Back!</h2>
+    <div class="input-box">
+        <i class='bx bxs-user'></i>
+        <input type="text" id="username" name="username" placeholder="username" required>
     </div>
-
-    <div class="container1">
-        <h1> Choose A Form </h1>
-        <div class="form-cards">
-            <div class="form-card1">
-                <img src="assets/addstudent.png">
-                <p class="head-card"> Create another record of student </p>
-                <a href="addstudent.php"><button class="button">Add Student</button></a>
-            </div>
-
-            <div class="form-card2">
-                <img src="assets/updatestudent.png">
-                <p class="head-card">Update student's information</p>
-                <a href="updstudent.php"><button class="button">Update Student</button></a>
-            </div>
-
-            <div class="form-card3">
-                <img src="assets/deletestudent.png">
-                <p class="head-card">Delete a student from the database</p>
-                <a href="delstudent.php"><button class="button">Delete Student</button></a>
-            </div>
-
-            <div class="form-card4">
-                <img src="assets/enrollstudent.png">
-                <p class="head-card">Enroll a new student</p>
-                <a href="enrstudent.php"><button class="button">Enroll Student</button></a>
-            </div>
-        </div>
+    <div class="input-box">
+        <i class='bx bxs-lock-alt'></i>
+        <input type="password" id="password" name="password" placeholder="password" required>
     </div>
+      <button type="submit" class="btn">Login</button>
+    </form>
+  </div>
 </body>
 </html>
+
