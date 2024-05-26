@@ -1,7 +1,7 @@
 <?php
     $host = 'localhost';
     $user = 'root';
-    $db = 'school';
+    $db = 'student_management';
     $pass = '';
     $port = '3306';
 
