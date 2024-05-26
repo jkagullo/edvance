@@ -12,7 +12,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
-    <link rel="stylesheet" href="static/css/student-dashboard.css">
+    <link rel="stylesheet" href="static/css/student-account.css">
     <title>Student Dashboard</title>
 </head>
 <body>
@@ -85,45 +85,37 @@
     </nav>
 
     <section class="home">
-        <div class="text">Dashboard</div>
+        <div class="text">Account Settings</div>
         <div class="wrapper">
             <div class="card card1">
-                <p class="header">Student Information</p>
+                <p class="header">Account Settings Information</p>
                 <table class="body-text">
-                    <tr>
-                        <td class="bold">Student ID</td>
-                        <td>1001</td>
-                    </tr>
                     <tr>
                         <td class="bold">First Name</td>
                         <td>Jhan Kyle</td>
+                        <td class="button"><a href="#"><button class="edit">Edit</button></a></td>
                     </tr>
                     <tr>
                         <td class="bold">Last Name</td>
                         <td>Agullo</td>
+                        <td class="button"><a href=""><button class="edit">Edit</button></a></td>
                     </tr>
                     <tr>
                         <td class="bold">Email</td>
                         <td>jkyleagullo@gmail.com</td>
+                        <td class="button"><a href=""><button class="edit">Edit</button></a></td>
+                    </tr>
+                    <tr>
+                        <td class="bold">Account Username</td>
+                        <td>agullo</td>
+                        <td class="button"><a href=""><button class="edit">Edit</button></a></td>
+                    </tr>
+                    <tr>
+                        <td class="bold">Account Password</td>
+                        <td>******</td>
+                        <td class="button"><a href=""><button class="edit">Edit</button></a></td>
                     </tr>
                 </table>
-            </div>
-            <div class="card card2">
-                <div class="content content1">
-                    <p class="header">Highest Grade</p>
-                    <p class="value">A</p>
-                    <p class="target">Artifical Intelligence</p>
-                </div>
-                <div class="content content2">
-                    <p class="header">Lowest Grade</p>
-                    <p class="value">F</p>
-                    <p class="target">Automata Theory</p>
-                </div>
-                <div class="content content3">
-                    <p class="header">Date and Time</p>
-                    <p class="value">2:19 AM</p>
-                    <p class="target">27/05/24</p>
-                </div>
             </div>
         </div>
     </section>

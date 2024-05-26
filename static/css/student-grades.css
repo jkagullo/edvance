@@ -307,23 +307,18 @@ body.dark .switch::before{
     height: 90vh;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
+    justify-content: center;
 }
 
 .card1{
     width: 100%;
-    height: 48%;
+    height: auto;
     background: var(--card-bg-color);
     border-radius: 10px;
     padding: 20px;
-}
-
-.card2{
-    width: 100%;
-    height: 48%;
+    border: 1px solid black;
     display: flex;
-    flex-direction: row;
-    justify-content: space-between;
+    flex-direction: column;
 }
 
 .content{
@@ -350,16 +345,11 @@ body.dark .switch::before{
     color: var(--text-color);
 }
 
-.wrapper .card1{
-    display: flex;
-    flex-direction: column;
-    justify-content: space-around;
-}
-
 .wrapper .bold{
     font-weight: 600;
     background: var(--body-color);
-    width: 20%;
+    width: 50%;
+    text-align: left;
 }
 
 .value{
@@ -383,4 +373,5 @@ table {
 th, td {
     padding: 12px;
     border: 1px solid var(--text-color);
+    text-align: center;
 }
