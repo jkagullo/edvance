@@ -173,7 +173,7 @@
         // Unset the session variable
         <?php unset($_SESSION['update_status']); ?>
     <?php endif; ?>
-</script>
+    </script>
 
 </body>
 </html>

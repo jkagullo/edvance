@@ -49,13 +49,29 @@ $stmt->bind_result($lowest_grade_course, $lowest_grade);
 $stmt->fetch();
 $stmt->close();
 
-// set the default timezone tot the philippines
+// Prepare and execute the SQL query to get the total credits of the student
+$stmt = $conn->prepare("
+    SELECT SUM(c.credits) 
+    FROM enrollments e 
+    JOIN courses c ON e.course_id = c.id 
+    WHERE e.student_id = ?
+");
+$stmt->bind_param("i", $student_id);
+if (!$stmt->execute()) {
+    die('Error executing query: ' . $stmt->error);
+}
+$stmt->bind_result($total_credits);
+$stmt->fetch();
+$stmt->close();
+
+// Set the default timezone to the Philippines
 date_default_timezone_set("Asia/Manila");
 // Get the current date and time
 $current_datetime = date("Y-m-d H:i:s");
 
 $conn->close();
 ?>
+
 
 
 <!DOCTYPE html>
@@ -178,8 +194,8 @@ $conn->close();
                     <p class="target"><?php echo $lowest_grade_course; ?></p>
                 </div>
                 <div class="content content3">
-                    <p class="header">Date and Time</p>
-                    <p class="value"><?php echo date("h:i A", strtotime($current_datetime)); ?></p>
+                    <p class="header">Total Credits</p>
+                    <p class="value"><?php echo $total_credits; ?></p>
                     <p class="target"><?php echo date("d/m/y", strtotime($current_datetime)); ?></p>
                 </div>
             </div>
