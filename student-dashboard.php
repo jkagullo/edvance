@@ -1,6 +1,62 @@
 <?php
-    include "db.php";
+include "db.php";
+session_start();
+
+// Check if the user is logged in and is a student
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] != 'student') {
+    header("Location: index.php");
+    exit();
+}
+
+$user_id = $_SESSION['user_id'];
+
+// Prepare and execute the SQL query to get student details
+$stmt = $conn->prepare("SELECT id, first_name, last_name, email FROM students WHERE user_id = ?");
+$stmt->bind_param("i", $user_id);
+$stmt->execute();
+$stmt->bind_result($student_id, $first_name, $last_name, $email);
+$stmt->fetch();
+$stmt->close();
+
+// Fetch the highest grade and its respective course name
+$stmt = $conn->prepare("
+    SELECT c.course_name, MAX(e.grade) 
+    FROM enrollments e 
+    JOIN courses c ON e.course_id = c.id 
+    WHERE e.student_id = ?
+");
+$stmt->bind_param("i", $student_id);
+if (!$stmt->execute()) {
+    die('Error executing query: ' . $stmt->error);
+}
+$stmt->bind_result($highest_grade_course, $highest_grade);
+$stmt->fetch();
+$stmt->close();
+
+// Fetch the lowest grade and its respective course name
+$stmt = $conn->prepare("
+    SELECT c.course_name, MIN(e.grade) 
+    FROM enrollments e 
+    JOIN courses c ON e.course_id = c.id 
+    WHERE e.student_id = ? 
+");
+
+$stmt->bind_param("i", $student_id);
+if (!$stmt->execute()) {
+    die('Error executing query: ' . $stmt->error);
+}
+$stmt->bind_result($lowest_grade_course, $lowest_grade);
+$stmt->fetch();
+$stmt->close();
+
+// set the default timezone tot the philippines
+date_default_timezone_set("Asia/Manila");
+// Get the current date and time
+$current_datetime = date("Y-m-d H:i:s");
+
+$conn->close();
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -90,47 +146,44 @@
         <div class="wrapper">
             <div class="card card1">
                 <p class="header">Student Information</p>
+
                 <table class="body-text">
                     <tr>
                         <td class="bold">Student ID</td>
-                        <td>1001</td>
+                        <td><?php echo $student_id; ?></td>
                     </tr>
                     <tr>
                         <td class="bold">First Name</td>
-                        <td>Jhan Kyle</td>
+                        <td><?php echo $first_name; ?></td>
                     </tr>
                     <tr>
                         <td class="bold">Last Name</td>
-                        <td>Agullo</td>
+                        <td><?php echo $last_name; ?></td>
                     </tr>
                     <tr>
                         <td class="bold">Email</td>
-                        <td>jkyleagullo@gmail.com</td>
+                        <td><?php echo $email; ?></td>
                     </tr>
                 </table>
             </div>
             <div class="card card2">
                 <div class="content content1">
                     <p class="header">Highest Grade</p>
-                    <p class="value">A</p>
-                    <p class="target">Artifical Intelligence</p>
+                    <p class="value"><?php echo $highest_grade; ?></p>
+                    <p class="target"><?php echo $highest_grade_course; ?></p>
                 </div>
                 <div class="content content2">
                     <p class="header">Lowest Grade</p>
-                    <p class="value">F</p>
-                    <p class="target">Automata Theory</p>
+                    <p class="value"><?php echo $lowest_grade; ?></p>
+                    <p class="target"><?php echo $lowest_grade_course; ?></p>
                 </div>
                 <div class="content content3">
                     <p class="header">Date and Time</p>
-                    <p class="value">2:19 AM</p>
-                    <p class="target">27/05/24</p>
+                    <p class="value"><?php echo date("h:i A", strtotime($current_datetime)); ?></p>
+                    <p class="target"><?php echo date("d/m/y", strtotime($current_datetime)); ?></p>
                 </div>
             </div>
         </div>
     </section>
-
-    
-
     <script src="script.js"></script>
 </body>
-</html>
