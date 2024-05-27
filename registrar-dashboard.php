@@ -19,11 +19,7 @@ $stmt->fetch();
 $stmt->close();
 
 // Prepare and execute the SQL query to get enrollments today
-$stmt = $conn->prepare("
-    SELECT COUNT(*) 
-    FROM enrollments 
-    WHERE DATE(enrollment_date) = CURDATE()
-");
+$stmt = $conn->prepare("SELECT COUNT(*) FROM enrollments WHERE DATE(enrollment_date) = CURDATE()");
 $stmt->execute();
 $stmt->bind_result($enrollments_today);
 $stmt->fetch();
