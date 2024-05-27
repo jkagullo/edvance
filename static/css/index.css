@@ -169,3 +169,7 @@ body {
 .register-link p a:hover {
     text-decoration: underline;
 }
+
+.error-message{
+    text-align: center;
+}
