@@ -14,7 +14,7 @@
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <link rel="stylesheet" href="static/css/registrar-account.css">
     <link rel="icon" href="assets/logo3.svg" type="image/x-icon">
-    <title>Student Dashboard</title>
+    <title>Registrar Account</title>
 </head>
 <body>
     <nav class="sidebar close">

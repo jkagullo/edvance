@@ -14,7 +14,7 @@
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <link rel="stylesheet" href="static/css/registrar-dashboard.css">
     <link rel="icon" href="assets/logo3.svg" type="image/x-icon">
-    <title>Registrar Dashboard</title>
+    <title>Admin Dashboard</title>
 </head>
 <body>
     <nav class="sidebar close">
@@ -26,7 +26,7 @@
 
                 <div class="text header-text">
                     <span class="name">Edvance</span>
-                    <span class="profession">Registrar</span>
+                    <span class="profession">Admin</span>
                 </div>
             </div>
 
@@ -40,21 +40,21 @@
                 </li>
                 <ul class="menu-links">
                     <li class="nav-link">
-                        <a href="registrar-dashboard.php">
+                        <a href="admin-dashboard.php">
                             <i class='bx bx-home-alt icon'></i>
                             <span class="text nav-text">Dashboard</span>
                         </a>
                     </li>
 
                     <li class="nav-link">
-                        <a href="registrar-management.php">
+                        <a href="admin-management.php">
                             <i class='bx bx-server icon' ></i>
                             <span class="text nav-text">Management</span>
                         </a>
                     </li>
 
                     <li class="nav-link">
-                        <a href="registrar-account.php">
+                        <a href="admin-account.php">
                             <i class='bx bxs-cog icon' ></i>
                             <span class="text nav-text">Account Settings</span>
                         </a>
@@ -89,7 +89,7 @@
         <div class="text">Dashboard</div>
         <div class="wrapper">
             <div class="card card1">
-                <p class="header">Registrar Information</p>
+                <p class="header">Admin Information</p>
                 <table class="body-text">
                     <tr>
                         <td class="bold">Registrar Account ID</td>
@@ -111,19 +111,19 @@
             </div>
             <div class="card card2">
                 <div class="content content1">
-                    <p class="header">Enrollments Today</p>
-                    <p class="value">10</p>
+                    <p class="header">Total Students</p>
+                    <p class="value">100</p>
                     <p class="target"></p>
                 </div>
                 <div class="content content2">
-                    <p class="header">Total Enrollments</p>
+                    <p class="header">Total Registrars</p>
                     <p class="value">50</p>
                     <p class="target"></p>
                 </div>
                 <div class="content content3">
-                    <p class="header">Date and Time</p>
-                    <p class="value">2:19 AM</p>
-                    <p class="target">27/05/24</p>
+                    <p class="header">Total Courses</p>
+                    <p class="value">9</p>
+                    <p class="target"></p>
                 </div>
             </div>
         </div>
