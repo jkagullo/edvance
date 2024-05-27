@@ -11,6 +11,7 @@
     <link href='https://cdn.jsdelivr.net/npm/boxicons@2.0.5/css/boxicons.min.css' rel='stylesheet'>
     <link rel="shortcut icon" href="assets/logo1.svg" type="image/x-icon">
     <link rel="stylesheet" href="static/css/index.css">
+    <link rel="icon" href="assets/logo3.svg" type="image/x-icon">
     <title>edvance.</title>
 </head>
 <body>

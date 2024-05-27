@@ -13,6 +13,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <link rel="stylesheet" href="static/css/student-dashboard.css">
+    <link rel="icon" href="assets/logo3.svg" type="image/x-icon">
     <title>Student Dashboard</title>
 </head>
 <body>
