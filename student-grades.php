@@ -1,5 +1,34 @@
 <?php
-    include "db.php";
+include "db.php";
+session_start();
+
+// Check if the user is logged in and is a student
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] != 'student') {
+    header("Location: index.php");
+    exit();
+}
+
+$user_id = $_SESSION['user_id'];
+
+// Retrieve student_id from students table using user_id
+$stmt = $conn->prepare("SELECT id FROM students WHERE user_id = ?");
+$stmt->bind_param("i", $user_id);
+$stmt->execute();
+$stmt->bind_result($student_id);
+$stmt->fetch();
+$stmt->close();
+
+// Prepare and execute the SQL query to fetch course name and grade
+$stmt = $conn->prepare("
+    SELECT c.course_name, e.grade 
+    FROM enrollments e 
+    JOIN courses c ON e.course_id = c.id 
+    WHERE e.student_id = ?
+");
+$stmt->bind_param("i", $student_id);
+$stmt->execute();
+$result = $stmt->get_result(); // Fetch the result
+$stmt->close();
 ?>
 
 <!DOCTYPE html>
@@ -91,42 +120,19 @@
             <div class="card card1">
                 <p class="header">Grades Information</p>
                 <table class="body-text">
-                    <tr>
-                        <td class="bold">Methods of Research in Computing</td>
-                        <td>A</td>
-                    </tr>
-                    <tr>
-                        <td class="bold">Automata Theory and Formal Language</td>
-                        <td>B</td>
-                    </tr>
-                    <tr>
-                        <td class="bold">Artificial Intelligence (Lab)</td>
-                        <td>C</td>
-                    </tr>
-                    <tr>
-                        <td class="bold">Artificial Intelligence (Lec)</td>
-                        <td>D</td>
-                    </tr>
-                    <tr>
-                        <td class="bold">Modeling and Simulation</td>
-                        <td>E</td>
-                    </tr>
-                    <tr>
-                        <td class="bold">Software Engineering (Lab)</td>
-                        <td>A</td>
-                    </tr>
-                    <tr>
-                        <td class="bold">Software Engineering (Lec)</td>
-                        <td>B</td>
-                    </tr>
-                    <tr>
-                        <td class="bold">CS Professional Elective 3</td>
-                        <td>C</td>
-                    </tr>
-                    <tr>
-                        <td class="bold">CS Professional Elective 4</td>
-                        <td>D</td>
-                    </tr>
+                    <?php
+                        if ($result->num_rows > 0) {
+                            // Output data of each row
+                            while($row = $result->fetch_assoc()) {
+                                echo "<tr>";
+                                echo "<td class='bold'>" . $row["course_name"] . "</td>";
+                                echo "<td>" . $row["grade"] . "</td>";
+                                echo "</tr>";
+                            }
+                        } else {
+                            echo "<tr><td>No grades available</td></tr>";
+                        }
+                    ?>
                 </table>
             </div>
         </div>
