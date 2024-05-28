@@ -152,10 +152,6 @@
 </section>
 
 <div id="snackbar"></div>
-
-
-    
-
     <script src="script.js"></script>
     <script>
     // Get the snackbar div
