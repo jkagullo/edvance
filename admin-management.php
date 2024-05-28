@@ -179,6 +179,35 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete_student'])) {
     exit();
 }
 
+// Handle Add Course form submission
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add_course'])) {
+    // Retrieve and sanitize form data
+    $courseCode = test_input($_POST["course_code"]);
+    $courseName = test_input($_POST["course_name"]);
+    $credits = test_input($_POST["credits"]);
+
+    // Validate credits
+    if (!is_numeric($credits) || $credits < 0 || $credits > 100) {
+        $errorMessage = "Credits must be a number between 0 and 100";
+    } else {
+        // Insert the course into the database
+        $stmt = $conn->prepare("INSERT INTO courses (course_code, course_name, credits) VALUES (?, ?, ?)");
+        $stmt->bind_param("ssi", $courseCode, $courseName, $credits);
+        if ($stmt->execute()) {
+            // Course added successfully
+            $successMessage = "Course added successfully";
+        } else {
+            // Error adding course
+            $errorMessage = "Error adding course: " . $conn->error;
+        }
+        $stmt->close();
+    }
+
+    // Set session variable to display success/error message
+    $_SESSION['update_status'] = isset($successMessage) ? $successMessage : (isset($errorMessage) ? $errorMessage : "An unknown error occurred.");
+    header("Location: " . $_SERVER['PHP_SELF']); // Redirect to refresh the page
+    exit();
+}
 
 
 // Close the database connection
@@ -354,24 +383,17 @@ $conn->close();
                 </div>
                 <div class="content content4">
                     <p class="bold">Add Course</p>
-                    <p class="body-text">Search by Student ID</p>
-                    <input class="input" type="text" placeholder="Enter Student ID">
+                    <form method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>">
+                    <p class="body-text">Course Code</p>
+                    <input type="text" class="input" name="course_code" required>
+                    <p class="body-text">Course Name</p>
+                    <input type="text" class="input" name="course_name" required>
+                    <p class="body-text">Credits</p>
+                    <input type="number" class="input" name="credits" min="0" max="100" required>
                     <div class="buttons">
-                        <button>Search Student</button>
+                        <button type="submit" name="add_course">Add Course</button>
                     </div>
-                    <p class="body-text">First Name</p>
-                    <input type="text" class="input">
-                    <p class="body-text">Last Name</p>
-                    <input type="text" class="input">
-                    <p class="body-text">Email</p>
-                    <input type="text" class="input">
-                    <p class="body-text">Update Course</p>
-                    <select name="courses" id="courses">
-                        <option value="CC103-M">Aritifical Intelligence</option>
-                    </select>
-                    <div class="buttons">
-                        <button>Add Course</button>
-                    </div>
+                    </form>
                 </div>
                 <div class="content content5">
                     <p class="bold">Edit/Update Course</p>
