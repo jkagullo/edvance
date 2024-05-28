@@ -1,8 +1,14 @@
 <?php
 include "db.php";
-
-// Start the session to use session variables
 session_start();
+
+// Check if the user is logged in and is a registrar
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] != 'registrar') {
+    header("Location: index.php");
+    exit();
+}
+
+$user_id = $_SESSION['user_id'];
 
 
 // Fetch students for the dropdown in "Enroll Student"

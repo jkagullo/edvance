@@ -313,7 +313,7 @@ body.dark .switch::before{
 
 .card1{
     width: 50%;
-    height: auto;
+    height: 100%;
     background: var(--card-bg-color);
     border-radius: 10px;
     padding: 20px;
@@ -429,6 +429,9 @@ form{
     justify-content: space-between;
 }
 
+.input{
+    margin-bottom: 10px;
+}
 .card .input, .buttons, select{
     height: 30px;
 }
