@@ -209,6 +209,151 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add_course'])) {
     exit();
 }
 
+// Handle Edit/Update Course form submission
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['edit_course'])) {
+    // Retrieve course ID from the form
+    $courseId = test_input($_POST["course_id"]);
+    error_log("Course ID to edit: " . $courseId);
+
+    // Fetch course information from the database
+    $stmt = $conn->prepare("SELECT id, course_code, course_name, credits FROM courses WHERE id = ?");
+    if (!$stmt) {
+        error_log("Prepare failed: " . $conn->error);
+    }
+    $stmt->bind_param("i", $courseId);
+    if (!$stmt->execute()) {
+        error_log("Execute failed: " . $stmt->error);
+    }
+    $result = $stmt->get_result();
+
+    if ($result->num_rows > 0) {
+        // Course found, populate the input fields
+        $row = $result->fetch_assoc();
+        $courseId = $row['id'];
+        $courseCode = $row['course_code'];
+        $courseName = $row['course_name'];
+        $credits = $row['credits'];
+        error_log("Course details fetched: " . json_encode($row));
+    } else {
+        // Course not found
+        $errorMessage = "Course not found";
+        error_log($errorMessage);
+    }
+
+    $stmt->close();
+}
+
+// Handle Update Course form submission
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update_course'])) {
+    // Retrieve and validate form data
+    $courseId = test_input($_POST["course_id"]);
+    $courseCode = test_input($_POST["course_code"]);
+    $courseName = test_input($_POST["course_name"]);
+    $credits = test_input($_POST["credits"]);
+    error_log("Updating course ID: " . $courseId . " with data - Code: " . $courseCode . ", Name: " . $courseName . ", Credits: " . $credits);
+
+    // Validate credits
+    if (!is_numeric($credits) || $credits < 0 || $credits > 100) {
+        $errorMessage = "Credits must be a number between 0 and 100";
+    } else {
+        // Update course information in the database
+        $stmt = $conn->prepare("UPDATE courses SET course_code = ?, course_name = ?, credits = ? WHERE id = ?");
+        if (!$stmt) {
+            error_log("Prepare failed: " . $conn->error);
+        }
+        $stmt->bind_param("ssii", $courseCode, $courseName, $credits, $courseId);
+        if ($stmt->execute()) {
+            // Course information updated successfully
+            $successMessage = "Course information updated successfully";
+            error_log($successMessage);
+        } else {
+            // Error updating course information
+            $errorMessage = "Error updating course information: " . $stmt->error;
+            error_log($errorMessage);
+        }
+        $stmt->close();
+    }
+
+    // Set session variable to display success/error message
+    $_SESSION['update_status'] = isset($successMessage) ? $successMessage : (isset($errorMessage) ? $errorMessage : "An unknown error occurred.");
+    header("Location: " . $_SERVER['PHP_SELF']); // Redirect to refresh the page
+    exit();
+}
+
+// Handle Search Course form submission
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['search_course'])) {
+    // Retrieve course ID from the form
+    $deleteCourseId = test_input($_POST["delete_course_id"]);
+
+    // Fetch course information from the database
+    $stmt = $conn->prepare("SELECT id, course_code, course_name FROM courses WHERE id = ?");
+    $stmt->bind_param("i", $deleteCourseId);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    if ($result->num_rows > 0) {
+        // Course found, store the information
+        $courseInfo = $result->fetch_assoc();
+    } else {
+        // Course not found
+        $errorMessage = "Course not found";
+    }
+
+    $stmt->close();
+}
+
+// Handle Delete Course form submission
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete_course'])) {
+    // Retrieve course ID from the form
+    $deleteCourseId = test_input($_POST["delete_course_id"]);
+
+    // Delete the course from the database
+    $stmt = $conn->prepare("DELETE FROM courses WHERE id = ?");
+    $stmt->bind_param("i", $deleteCourseId);
+    if ($stmt->execute()) {
+        // Course deleted successfully
+        $successMessage = "Course deleted successfully";
+    } else {
+        // Error deleting course
+        $errorMessage = "Error deleting course: " . $conn->error;
+    }
+    $stmt->close();
+
+    // Set session variable to display success/error message
+    $_SESSION['update_status'] = isset($successMessage) ? $successMessage : (isset($errorMessage) ? $errorMessage : "An unknown error occurred.");
+    header("Location: " . $_SERVER['PHP_SELF']); // Redirect to refresh the page
+    exit();
+}
+
+// Handle Add Registrar form submission
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add_registrar'])) {
+    // Retrieve and sanitize form data
+    $registrarFirstName = test_input($_POST["registrar_first_name"]);
+    $registrarLastName = test_input($_POST["registrar_last_name"]);
+    $registrarEmail = test_input($_POST["registrar_email"]);
+    $registrarUsername = test_input($_POST["registrar_username"]);
+    $registrarPassword = password_hash($_POST["registrar_password"], PASSWORD_DEFAULT); // Hash the password
+
+    // Insert the registrar into the database
+    $stmt = $conn->prepare("INSERT INTO users (first_name, last_name, email, username, password, role) VALUES (?, ?, ?, ?, ?, 'registrar')");
+    $stmt->bind_param("sssss", $registrarFirstName, $registrarLastName, $registrarEmail, $registrarUsername, $registrarPassword);
+    if ($stmt->execute()) {
+        // Registrar added successfully
+        $successMessage = "Registrar added successfully";
+    } else {
+        // Error adding registrar
+        $errorMessage = "Error adding registrar: " . $conn->error;
+    }
+    $stmt->close();
+
+    // Set session variable to display success/error message
+    $_SESSION['update_status'] = isset($successMessage) ? $successMessage : (isset($errorMessage) ? $errorMessage : "An unknown error occurred.");
+    header("Location: " . $_SERVER['PHP_SELF']); // Redirect to refresh the page
+    exit();
+}
+
+
+
 
 // Close the database connection
 $conn->close();
@@ -398,33 +543,49 @@ $conn->close();
                 <div class="content content5">
                     <p class="bold">Edit/Update Course</p>
                     <p class="body-text">Search by Course Code</p>
-                    <input class="input" type="text" placeholder="Enter Course Code">
-                    <div class="buttons">
-                        <button>Search Course</button>
-                    </div>
-                    <p class="body-text">Course Code</p>
-                    <input type="text" class="input">
-                    <p class="body-text">Course Name</p>
-                    <input type="text" class="input">
-                    <div class="buttons">
-                        <button>Update Course</button>
-                    </div>
+                    <form method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>">
+                        <input class="input" type="text" name="course_id" placeholder="Enter Course ID">
+                        <div class="buttons">
+                            <button type="submit" name="edit_course">Search Course</button>
+                        </div>
+                        <?php if (isset($courseCode)): ?>
+                        <p class="body-text">Course Code</p>
+                        <input type="text" class="input" name="course_code" value="<?php echo $courseCode; ?>">
+                        <p class="body-text">Course Name</p>
+                        <input type="text" class="input" name="course_name" value="<?php echo $courseName; ?>">
+                        <p class="body-text">Course Credits</p>
+                        <input type="number" class="input" name="credits" value="<?php echo $credits; ?>" min="0" max="100">
+                        <!-- Hidden field for course ID -->
+                        <input type="hidden" name="course_id" value="<?php echo $courseId; ?>">
+                        <div class="buttons">
+                            <button type="submit" name="update_course">Update Course</button>
+                        </div>
+                        <?php endif; ?>
+                    </form>
                 </div>
                 <div class="content content6">
-                <p class="bold">Delete Course</p>
-                    <p class="body-text">Search by Course Code</p>
-                    <input class="input" type="text" placeholder="Enter Course Code">
-                    <div class="buttons">
-                        <button>Search Course</button>
-                    </div>
+                    <p class="bold">Delete Course</p>
+                    <form method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>">
+                        <p class="body-text">Search by Course Code</p>
+                        <input class="input" type="text" name="delete_course_id" placeholder="Enter Course Code">
+                        <div class="buttons">
+                            <button type="submit" name="search_course">Search Course</button>
+                        </div>
+                    </form>
+                    <?php if(isset($courseInfo)): ?>
                     <p class="bold">Course Code</p>
-                    <p class="body-text">Result</p>
+                    <p class="body-text"><?php echo $courseInfo['course_code']; ?></p>
                     <p class="bold">Course Name</p>
-                    <p class="body-text">Result</p>
-                    <div class="buttons">
-                        <button>Delete Course</button>
-                    </div>
+                    <p class="body-text"><?php echo $courseInfo['course_name']; ?></p>
+                    <form method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>">
+                        <input type="hidden" name="delete_course_id" value="<?php echo $courseInfo['id']; ?>">
+                        <div class="buttons">
+                            <button type="submit" name="delete_course">Delete Course</button>
+                        </div>
+                    </form>
+                    <?php endif; ?>
                 </div>
+
                 <div class="content content7">
                     <p class="bold">Add Registrar</p>
                     <p class="body-text">First Name</p>
