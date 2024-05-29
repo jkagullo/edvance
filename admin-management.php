@@ -29,6 +29,11 @@ $studentId = $courseId = $grade = "";
 $studentIdErr = $courseIdErr = $gradeErr = "";
 $successMessage = $errorMessage = "";
 
+// Initialize variables to store form data and error messages
+$registrarId = $registrarFirstName = $registrarLastName = $registrarEmail = $registrarUsername = "";
+$registrarIdErr = $registrarFirstNameErr = $registrarLastNameErr = $registrarEmailErr = $registrarUsernameErr = $registrarPasswordErr = "";
+$successMessage = $errorMessage = "";
+
 // Function to sanitize form input
 function test_input($data) {
     $data = trim($data);
@@ -334,16 +339,37 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add_registrar'])) {
     $registrarUsername = test_input($_POST["registrar_username"]);
     $registrarPassword = password_hash($_POST["registrar_password"], PASSWORD_DEFAULT); // Hash the password
 
-    // Insert the registrar into the database
-    $stmt = $conn->prepare("INSERT INTO users (first_name, last_name, email, username, password, role) VALUES (?, ?, ?, ?, ?, 'registrar')");
-    $stmt->bind_param("sssss", $registrarFirstName, $registrarLastName, $registrarEmail, $registrarUsername, $registrarPassword);
-    if ($stmt->execute()) {
-        // Registrar added successfully
+    // Start transaction
+    $conn->begin_transaction();
+
+    try {
+        // Insert into users table
+        $stmt = $conn->prepare("INSERT INTO users (username, password, role) VALUES (?, ?, 'registrar')");
+        $stmt->bind_param("ss", $registrarUsername, $registrarPassword);
+        if (!$stmt->execute()) {
+            throw new Exception("Error adding user: " . $stmt->error);
+        }
+
+        // Get the inserted user ID
+        $userId = $conn->insert_id;
+
+        // Insert into registrars table
+        $stmt = $conn->prepare("INSERT INTO registrars (user_id, first_name, last_name, email) VALUES (?, ?, ?, ?)");
+        $stmt->bind_param("isss", $userId, $registrarFirstName, $registrarLastName, $registrarEmail);
+        if (!$stmt->execute()) {
+            throw new Exception("Error adding registrar: " . $stmt->error);
+        }
+
+        // Commit transaction
+        $conn->commit();
         $successMessage = "Registrar added successfully";
-    } else {
-        // Error adding registrar
-        $errorMessage = "Error adding registrar: " . $conn->error;
+    } catch (Exception $e) {
+        // Rollback transaction
+        $conn->rollback();
+        $errorMessage = $e->getMessage();
     }
+
+    // Close statement
     $stmt->close();
 
     // Set session variable to display success/error message
@@ -352,7 +378,130 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add_registrar'])) {
     exit();
 }
 
+// Handle Search Registrar form submission
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['search_registrar'])) {
+    // Retrieve registrar ID from the form
+    $registrarId = test_input($_POST["registrar_id"]);
 
+    // Fetch registrar information from the database
+    $stmt = $conn->prepare("SELECT users.id, users.username, registrars.first_name, registrars.last_name, registrars.email 
+                            FROM users 
+                            JOIN registrars ON users.id = registrars.user_id 
+                            WHERE users.id = ? AND users.role = 'registrar'");
+    $stmt->bind_param("i", $registrarId);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    if ($result->num_rows > 0) {
+        // Registrar found, populate the input fields
+        $row = $result->fetch_assoc();
+        $registrarId = $row['id'];
+        $registrarFirstName = $row['first_name'];
+        $registrarLastName = $row['last_name'];
+        $registrarEmail = $row['email'];
+        $registrarUsername = $row['username'];
+    } else {
+        // Registrar not found
+        $errorMessage = "Registrar not found";
+    }
+
+    $stmt->close();
+}
+
+// Handle Update Registrar form submission
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update_registrar'])) {
+    // Retrieve and validate form data
+    $registrarId = test_input($_POST["registrar_id"]);
+    $registrarFirstName = test_input($_POST["registrar_first_name"]);
+    $registrarLastName = test_input($_POST["registrar_last_name"]);
+    $registrarEmail = test_input($_POST["registrar_email"]);
+    $registrarUsername = test_input($_POST["registrar_username"]);
+    $registrarPassword = !empty($_POST["registrar_password"]) ? password_hash($_POST["registrar_password"], PASSWORD_DEFAULT) : "";
+
+    // Validate inputs
+    if (empty($registrarFirstName)) $registrarFirstNameErr = "First name is required";
+    if (empty($registrarLastName)) $registrarLastNameErr = "Last name is required";
+    if (empty($registrarEmail) || !filter_var($registrarEmail, FILTER_VALIDATE_EMAIL)) $registrarEmailErr = "Valid email is required";
+    if (empty($registrarUsername)) $registrarUsernameErr = "Username is required";
+
+    if (empty($registrarFirstNameErr) && empty($registrarLastNameErr) && empty($registrarEmailErr) && empty($registrarUsernameErr)) {
+        // Update registrar information in the database
+        if (!empty($registrarPassword)) {
+            // Update password if provided
+            $stmt = $conn->prepare("UPDATE users SET username = ?, password = ? WHERE id = ?");
+            $stmt->bind_param("ssi", $registrarUsername, $registrarPassword, $registrarId);
+        } else {
+            $stmt = $conn->prepare("UPDATE users SET username = ? WHERE id = ?");
+            $stmt->bind_param("si", $registrarUsername, $registrarId);
+        }
+        if ($stmt->execute()) {
+            // Update registrar table
+            $stmt = $conn->prepare("UPDATE registrars SET first_name = ?, last_name = ?, email = ? WHERE user_id = ?");
+            $stmt->bind_param("sssi", $registrarFirstName, $registrarLastName, $registrarEmail, $registrarId);
+            if ($stmt->execute()) {
+                // Registrar information updated successfully
+                $successMessage = "Registrar information updated successfully";
+            } else {
+                // Error updating registrar information
+                $errorMessage = "Error updating registrar information: " . $stmt->error;
+            }
+        } else {
+            // Error updating user information
+            $errorMessage = "Error updating user information: " . $stmt->error;
+        }
+        $stmt->close();
+    }
+
+    // Set session variable to display success/error message
+    $_SESSION['update_status'] = $successMessage ? $successMessage : $errorMessage;
+    header("Location: " . $_SERVER['PHP_SELF']); // Redirect to refresh the page
+    exit();
+}
+
+// Handle Search Registrar form submission
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['search_registrar'])) {
+    // Retrieve registrar ID from the form
+    $deleteRegistrarId = test_input($_POST["delete_registrar_id"]);
+
+    // Fetch registrar information from the database
+    $stmt = $conn->prepare("SELECT id, username, role FROM users WHERE id = ? AND role = 'registrar'");
+    $stmt->bind_param("i", $deleteRegistrarId);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    if ($result->num_rows > 0) {
+        // Registrar found, store the information
+        $registrarInfo = $result->fetch_assoc();
+    } else {
+        // Registrar not found
+        $errorMessage = "Registrar not found";
+    }
+
+    $stmt->close();
+}
+
+// Handle Delete Registrar button click
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete_registrar'])) {
+    // Retrieve registrar ID from the form
+    $deleteRegistrarId = test_input($_POST["delete_registrar_id"]);
+
+    // Delete the registrar (user with role 'registrar') from the database
+    $stmt = $conn->prepare("DELETE FROM users WHERE id = ? AND role = 'registrar'");
+    $stmt->bind_param("i", $deleteRegistrarId);
+    if ($stmt->execute()) {
+        // Registrar deleted successfully
+        $successMessage = "Registrar deleted successfully";
+    } else {
+        // Error deleting registrar
+        $errorMessage = "Error deleting registrar: " . $conn->error;
+    }
+    $stmt->close();
+
+    // Set session variable to display success/error message
+    $_SESSION['update_status'] = isset($successMessage) ? $successMessage : (isset($errorMessage) ? $errorMessage : "An unknown error occurred.");
+    header("Location: " . $_SERVER['PHP_SELF']); // Redirect to refresh the page
+    exit();
+}
 
 
 // Close the database connection
@@ -587,62 +736,82 @@ $conn->close();
                 </div>
 
                 <div class="content content7">
-                    <p class="bold">Add Registrar</p>
-                    <p class="body-text">First Name</p>
-                    <input type="text" class="input">
-                    <p class="body-text">Last Name</p>
-                    <input type="text" class="input">
-                    <p class="body-text">Email</p>
-                    <input type="text" class="input">
-                    <p class="body-text">Account Username</p>
-                    <input type="text" class="input">
-                    <p class="body-text">Account Password</p>
-                    <input type="text" class="input">
-                    <div class="buttons">
-                        <button>Add Registrar</button>
-                    </div>
+                    <form method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>">
+                        <p class="bold">Add Registrar</p>
+                        <p class="body-text">First Name</p>
+                        <input type="text" class="input" name="registrar_first_name" required>
+                        <p class="body-text">Last Name</p>
+                        <input type="text" class="input" name="registrar_last_name" required>
+                        <p class="body-text">Email</p>
+                        <input type="email" class="input" name="registrar_email" required>
+                        <p class="body-text">Account Username</p>
+                        <input type="text" class="input" name="registrar_username" required>
+                        <p class="body-text">Account Password</p>
+                        <input type="password" class="input" name="registrar_password" required>
+                        <div class="buttons">
+                            <button type="submit" name="add_registrar">Add Registrar</button>
+                        </div>
+                    </form>
                 </div>
                 <div class="content content8">
                     <p class="bold">Edit/Update Registrar</p>
-                    <p class="body-text">Search by Registrar ID</p>
-                    <input class="input" type="text" placeholder="Enter Registrar ID">
-                    <div class="buttons">
-                        <button>Search Registrar</button>
-                    </div>
-                    <p class="body-text">First Name</p>
-                    <input type="text" class="input">
-                    <p class="body-text">Last Name</p>
-                    <input type="text" class="input">
-                    <p class="body-text">Email</p>
-                    <input type="text" class="input">
-                    <p class="body-text">Username</p>
-                    <input type="text" class="input">
-                    <p class="body-text">Password</p>
-                    <input type="text" class="input">
-                    <div class="buttons">
-                        <button>Update Registrar</button>
-                    </div>
+                    <form method="POST" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>">
+                        <p class="body-text">Search by Registrar ID</p>
+                        <input class="input" type="text" name="registrar_id" value="<?php echo $registrarId; ?>" placeholder="Enter Registrar ID">
+                        <div class="buttons">
+                            <button type="submit" name="search_registrar">Search Registrar</button>
+                        </div>
+                    </form>
+                    
+                    <?php if (!empty($registrarId)): ?>
+                        <form method="POST" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>">
+                            <input type="hidden" name="registrar_id" value="<?php echo $registrarId; ?>">
+                            <p class="body-text">First Name</p>
+                            <input type="text" name="registrar_first_name" class="input" value="<?php echo $registrarFirstName; ?>">
+                            <p class="body-text">Last Name</p>
+                            <input type="text" name="registrar_last_name" class="input" value="<?php echo $registrarLastName; ?>">
+                            <p class="body-text">Email</p>
+                            <input type="text" name="registrar_email" class="input" value="<?php echo $registrarEmail; ?>">
+                            <p class="body-text">Username</p>
+                            <input type="text" name="registrar_username" class="input" value="<?php echo $registrarUsername; ?>">
+                            <p class="body-text">Password (leave blank to keep current password)</p>
+                            <input type="password" name="registrar_password" class="input">
+                            <div class="buttons">
+                                <button type="submit" name="update_registrar">Update Registrar</button>
+                            </div>
+                        </form>
+                    <?php endif; ?>
+
+                    <?php if (!empty($successMessage)): ?>
+                        <div class="success-message"><?php echo $successMessage; ?></div>
+                    <?php endif; ?>
+                    <?php if (!empty($errorMessage)): ?>
+                        <div class="error-message"><?php echo $errorMessage; ?></div>
+                    <?php endif; ?>
                 </div>
                 <div class="content content9">
-                    <p class="bold">Delete Registar</p>
-                    <p class="body-text">Search by Registar ID</p>
-                    <input class="input" type="text" placeholder="Enter Registrar ID">
-                    <div class="buttons">
-                        <button>Search Registrar</button>
-                    </div>
-                    <p class="bold">First Name</p>
-                    <p class="body-text">Result</p>
-                    <p class="bold">Last Name</p>
-                    <p class="body-text">Result</p>
-                    <p class="bold">Email</p>
-                    <p class="body-text">Result</p>
-                    <p class="bold">Username</p>
-                    <p class="body-text">Result</p>
-                    <p class="bold">Password</p>
-                    <p class="body-text">Result</p>
-                    <div class="buttons">
-                        <button>Delete Registrar</button>
-                    </div>
+                    <p class="bold">Delete Registrar</p>
+                    <p class="body-text">Search by User ID</p>
+                    <form method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>">
+                        <input class="input" type="text" name="delete_registrar_id" placeholder="Enter Registrar ID">
+                        <div class="buttons">
+                            <button type="submit" name="search_registrar">Search Registrar</button>
+                        </div>
+                    </form>
+                    <?php if (isset($registrarInfo)): ?>
+                        <p class="bold">Username:</p>
+                        <p class="body-text"><?php echo htmlspecialchars($registrarInfo['username']); ?></p>
+                        <p class="bold">Role:</p>
+                        <p class="body-text"><?php echo htmlspecialchars($registrarInfo['role']); ?></p>
+                        <form method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>">
+                            <input type="hidden" name="delete_registrar_id" value="<?php echo $registrarInfo['id']; ?>">
+                            <div class="buttons">
+                                <button type="submit" name="delete_registrar">Delete Registrar</button>
+                            </div>
+                        </form>
+                    <?php elseif (isset($errorMessage)): ?>
+                        <p class="error"><?php echo $errorMessage; ?></p>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
