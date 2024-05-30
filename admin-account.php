@@ -1,5 +1,48 @@
 <?php
-    include "db.php";
+include "db.php";
+session_start();
+
+// Check if the user is logged in and is an admin
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] != 'admin') {
+    header("Location: index.php");
+    exit();
+}
+
+$user_id = $_SESSION['user_id'];
+
+// Fetch admin information from the database
+$query = "SELECT admins.first_name, admins.last_name, admins.email, users.username, users.password 
+          FROM admins 
+          INNER JOIN users ON admins.user_id = users.id
+          WHERE admins.user_id = $user_id";
+$result = mysqli_query($conn, $query);
+$row = mysqli_fetch_assoc($result);
+
+// Check if the form is submitted
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update_account'])) {
+    // Get form data
+    $first_name = mysqli_real_escape_string($conn, $_POST['first_name']);
+    $last_name = mysqli_real_escape_string($conn, $_POST['last_name']);
+    $email = mysqli_real_escape_string($conn, $_POST['email']);
+    $username = mysqli_real_escape_string($conn, $_POST['username']);
+    $password = mysqli_real_escape_string($conn, $_POST['password']);
+    
+    // Update admin information in the database
+    $update_query = "UPDATE admins 
+                     INNER JOIN users ON admins.user_id = users.id
+                     SET admins.first_name = '$first_name', admins.last_name = '$last_name', 
+                         admins.email = '$email', users.username = '$username', users.password = '$password'
+                     WHERE admins.user_id = $user_id";
+    $update_result = mysqli_query($conn, $update_query);
+    
+    if($update_result) {
+        // Set success message in session
+        $_SESSION['update_status'] = "Account information updated successfully.";
+    } else {
+        // Set error message in session
+        $_SESSION['update_status'] = "Error updating account information: " . mysqli_error($conn);
+    }
+}
 ?>
 
 <!DOCTYPE html>
@@ -90,39 +133,42 @@
         <div class="wrapper">
             <div class="card card1">
                 <p class="header">Account Settings Information</p>
-                <table class="body-text">
-                    <tr>
-                        <td class="bold">First Name</td>
-                        <td>Jhan Kyle</td>
-                        <td class="button"><a href="#"><button class="edit">Edit</button></a></td>
-                    </tr>
-                    <tr>
-                        <td class="bold">Last Name</td>
-                        <td>Agullo</td>
-                        <td class="button"><a href=""><button class="edit">Edit</button></a></td>
-                    </tr>
-                    <tr>
-                        <td class="bold">Email</td>
-                        <td>jkyleagullo@gmail.com</td>
-                        <td class="button"><a href=""><button class="edit">Edit</button></a></td>
-                    </tr>
-                    <tr>
-                        <td class="bold">Account Username</td>
-                        <td>agullo</td>
-                        <td class="button"><a href=""><button class="edit">Edit</button></a></td>
-                    </tr>
-                    <tr>
-                        <td class="bold">Account Password</td>
-                        <td>******</td>
-                        <td class="button"><a href=""><button class="edit">Edit</button></a></td>
-                    </tr>
-                </table>
+                <form method="POST">
+                    <p class="bold">First Name</p>
+                    <input type="text" name="first_name" value="<?php echo $row['first_name'];?>">
+                    <p class="bold">Last Name</p>
+                    <input type="text" name="last_name" value="<?php echo $row['last_name'];?>">
+                    <p class="bold">Email</p>
+                    <input type="text" name="email" value="<?php echo $row['email'];?>">
+                    <p class="bold">Account Username</p>
+                    <input type="text" name="username" value="<?php echo $row['username'];?>">
+                    <p class="bold">Account Password</p>
+                    <input type="text" name="password" value="<?php echo $row['password'];?>">
+                    <button type="submit" name="update_account">Update Account</button>
+                </form>
             </div>
         </div>
     </section>
-
-    
-
+ 
+    <div id="snackbar"></div>
     <script src="script.js"></script>
+    <script>
+    // Get the snackbar div
+    var snackbar = document.getElementById("snackbar");
+
+    // Check if the session variable is set
+    <?php if(isset($_SESSION['update_status'])): ?>
+        // Display the snackbar with appropriate message
+        snackbar.innerText = "<?php echo $_SESSION['update_status']; ?>";
+        snackbar.className = "show";
+        
+        // After 3 seconds, remove the show class from DIV
+        setTimeout(function(){ snackbar.className = snackbar.className.replace("show", ""); }, 3000);
+        
+        // Unset the session variable
+        <?php unset($_SESSION['update_status']); ?>
+    <?php endif; ?>
+    </script>
+    
 </body>
 </html>
