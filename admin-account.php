@@ -103,6 +103,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update_account'])) {
                         </a>
                     </li>
 
+                    <li class="nav-link">
+                        <a href="admin-reports.php">
+                            <i class='bx bxs-report icon' ></i>
+                            <span class="text nav-text">Reports</span>
+                        </a>
+                    </li>
+
                 </ul>
             </div>
             <div class="bottom-content">
